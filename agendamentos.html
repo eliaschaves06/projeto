@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Maker - Sistema de Agendamento</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #fff;
+    margin: 0;
+}
+
+header {
+    background: #1f1f1f;
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #333;
+    padding: 10px;
+    text-align: center;
+}
+
+.available { background: #2e7d32; cursor: pointer; }
+.unavailable { background: #b71c1c; }
+.selected { outline: 3px solid #fff; }
+
+form {
+    margin-top: 20px;
+    background: #1e1e1e;
+    padding: 15px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+}
+
+button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.lista {
+    margin-top: 20px;
+}
+
+.card {
+    background: #1e1e1e;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+.cancelar {
+    background: red;
+    margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>📅 Lab Maker - Agendamentos</header>
+
+<div class="container">
+
+<h3 id="mesAno"></h3>
+
+<table>
+<thead>
+<tr>
+<th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th>
+</tr>
+</thead>
+<tbody id="calendar"></tbody>
+</table>
+
+<form id="form">
+<input id="nome" placeholder="Nome" required>
+<input id="telefone" placeholder="Telefone" required>
+<input id="pessoas" type="number" placeholder="Qtd pessoas" required>
+
+<select id="hora"></select>
+
+<button>Agendar</button>
+</form>
+
+<div class="lista" id="lista"></div>
+
+</div>
+
+<script>
+const horariosBase = ["09:00","10:00","11:00","13:00","14:00","15:00"];
+
+let agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || {};
+let selectedDate = null;
+
+const calendar = document.getElementById("calendar");
+const lista = document.getElementById("lista");
+
+const hoje = new Date();
+const mes = hoje.getMonth();
+const ano = hoje.getFullYear();
+
+document.getElementById("mesAno").innerText =
+    hoje.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+
+const diasMes = new Date(ano, mes+1, 0).getDate();
+const primeiroDia = new Date(ano, mes, 1).getDay();
+
+let dia = 1;
+
+for(let i=0;i<6;i++){
+    const tr = document.createElement("tr");
+
+    for(let j=0;j<7;j++){
+        const td = document.createElement("td");
+
+        if(i===0 && j<primeiroDia){
+            td.innerText="";
+        } else if(dia<=diasMes){
+
+            const key = `${dia}/${mes+1}/${ano}`;
+            td.innerText = dia;
+
+            td.classList.add("available");
+
+            if(agendamentos[key] && agendamentos[key].length >= horariosBase.length){
+                td.classList.remove("available");
+                td.classList.add("unavailable");
+            }
+
+            td.onclick = ()=>selecionarData(td,key);
+
+            dia++;
+        }
+
+        tr.appendChild(td);
+    }
+
+    calendar.appendChild(tr);
+}
+
+function selecionarData(td,key){
+    document.querySelectorAll("td").forEach(td=>td.classList.remove("selected"));
+    td.classList.add("selected");
+
+    selectedDate = key;
+    carregarHorarios();
+}
+
+function carregarHorarios(){
+    const select = document.getElementById("hora");
+    select.innerHTML = '<option value="">Escolha horário</option>';
+
+    const usados = agendamentos[selectedDate] || [];
+
+    horariosBase.forEach(h=>{
+        if(!usados.find(a=>a.hora === h)){
+            const opt = document.createElement("option");
+            opt.value = h;
+            opt.textContent = h;
+            select.appendChild(opt);
+        }
+    });
+}
+
+document.getElementById("form").onsubmit = e=>{
+    e.preventDefault();
+
+    if(!selectedDate) return alert("Selecione data");
+
+    const nome = document.getElementById("nome").value;
+    const telefone = document.getElementById("telefone").value;
+    const pessoas = document.getElementById("pessoas").value;
+    const hora = document.getElementById("hora").value;
+
+    if(!hora) return alert("Escolha horário");
+
+    if(!agendamentos[selectedDate]){
+        agendamentos[selectedDate] = [];
+    }
+
+    agendamentos[selectedDate].push({nome,telefone,pessoas,hora});
+
+    localStorage.setItem("agendamentos", JSON.stringify(agendamentos));
+
+    alert("Agendado com sucesso!");
+    location.reload();
+};
+
+function renderLista(){
+    lista.innerHTML = "<h3>Agendamentos</h3>";
+
+    Object.keys(agendamentos).forEach(data=>{
+        agendamentos[data].forEach((a,index)=>{
+            const div = document.createElement("div");
+            div.className = "card";
+
+            div.innerHTML = `
+                <b>${data} - ${a.hora}</b><br>
+                ${a.nome} (${a.pessoas} pessoas)
+                <button class="cancelar">Cancelar</button>
+            `;
+
+            div.querySelector("button").onclick = ()=>{
+                agendamentos[data].splice(index,1);
+                if(agendamentos[data].length===0){
+                    delete agendamentos[data];
+                }
+                localStorage.setItem("agendamentos", JSON.stringify(agendamentos));
+                location.reload();
+            };
+
+            lista.appendChild(div);
+        });
+    });
+}
+
+renderLista();
+</script>
+
+</body>
+</html>

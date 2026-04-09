@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Maker - Dark Mode</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+header {
+    background-color: #1f1f1f;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border-bottom: 1px solid #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+}
+
+button {
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    background-color: #2563eb;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover { background-color: #1d4ed8; }
+
+.screen { display: none; }
+.active { display: block; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    padding: 0.7rem;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+th {
+    background-color: #2563eb;
+    color: white;
+}
+
+td.available { background-color: #2e7d32; cursor: pointer; }
+td.unavailable { background-color: #b71c1c; }
+
+form {
+    background-color: #1e1e1e;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 8px;
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 0.6rem;
+    margin: 0.4rem 0;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+/* Kanban */
+.kanban { display: flex; gap: 1rem; overflow-x: auto; }
+.kanban-column {
+    min-width: 200px;
+    background: #1e1e1e;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.kanban-card { padding: 0.5rem; margin: 0.5rem 0; border-radius: 5px; }
+
+.recebido { background: #b71c1c; }
+.analise { background: #f9a825; color:#000; }
+.fazendo { background: #1565c0; }
+.concluido { background: #2e7d32; }
+
+</style>
+</head>
+
+<body>
+
+<header>Lab Maker</header>
+
+<div class="container">
+
+<!-- HOME -->
+<div id="home" class="screen active">
+    <button onclick="showScreen('admin-login')">Login Administrador</button>
+    <button onclick="showScreen('agendamento')">Agendamento Lab Maker</button>
+    <button onclick="showScreen('solicitacoes')">Solicitações</button>
+</div>
+
+<!-- LOGIN -->
+<div id="admin-login" class="screen">
+    <h2>Login</h2>
+    <form id="admin-form">
+        <input type="email" placeholder="Email" required>
+        <input type="password" placeholder="Senha" required>
+        <button>Entrar</button>
+    </form>
+    <button onclick="showScreen('home')">Voltar</button>
+</div>
+
+<!-- AGENDAMENTO -->
+<div id="agendamento" class="screen">
+    <h2>Calendário</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Dom</th><th>Seg</th><th>Ter</th>
+                <th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th>
+            </tr>
+        </thead>
+        <tbody id="calendar-body"></tbody>
+    </table>
+
+    <form id="agendamento-form">
+        <input type="text" placeholder="Nome" required>
+        <input type="tel" placeholder="Telefone" required>
+        <input type="number" placeholder="Pessoas" required>
+        <button>Solicitar</button>
+    </form>
+
+    <button onclick="showScreen('home')">Voltar</button>
+</div>
+
+<!-- SOLICITAÇÕES -->
+<div id="solicitacoes" class="screen">
+    <h2>Kanban</h2>
+
+    <div class="kanban">
+        <div class="kanban-column">
+            <h3>Recebido</h3>
+            <div class="kanban-card recebido">Solicitação 1</div>
+        </div>
+
+        <div class="kanban-column">
+            <h3>Análise</h3>
+            <div class="kanban-card analise">Solicitação 2</div>
+        </div>
+
+        <div class="kanban-column">
+            <h3>Fazendo</h3>
+            <div class="kanban-card fazendo">Solicitação 3</div>
+        </div>
+
+        <div class="kanban-column">
+            <h3>Concluído</h3>
+            <div class="kanban-card concluido">Solicitação 4</div>
+        </div>
+    </div>
+
+    <form id="solicitacao-form">
+        <input type="text" placeholder="Nome" required>
+        <input type="tel" placeholder="Telefone" required>
+        <textarea placeholder="Descrição" required></textarea>
+        <button>Enviar</button>
+    </form>
+
+    <button onclick="showScreen('home')">Voltar</button>
+</div>
+
+</div>
+
+<script>
+
+// Trocar telas
+function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+// Criar calendário
+const calendar = document.getElementById('calendar-body');
+let day = 1;
+
+for(let i=0;i<5;i++){
+    let row = document.createElement('tr');
+
+    for(let j=0;j<7;j++){
+        let cell = document.createElement('td');
+
+        if(day <= 30){
+            cell.textContent = day;
+            cell.className = Math.random() > 0.3 ? 'available' : 'unavailable';
+            day++;
+        }
+
+        row.appendChild(cell);
+    }
+
+    calendar.appendChild(row);
+}
+
+// clique calendário
+calendar.addEventListener('click', e=>{
+    if(e.target.classList.contains('available')){
+        alert("Dia selecionado: " + e.target.textContent);
+    }
+});
+
+// formulário
+document.getElementById('agendamento-form').onsubmit = e=>{
+    e.preventDefault();
+    alert("Agendamento enviado!");
+};
+
+document.getElementById('solicitacao-form').onsubmit = e=>{
+    e.preventDefault();
+    alert("Solicitação enviada!");
+};
+
+// login fake
+document.getElementById('admin-form').onsubmit = e=>{
+    e.preventDefault();
+
+    let email = e.target[0].value;
+    let senha = e.target[1].value;
+
+    if(email === "admin@lab.com" && senha === "123"){
+        alert("Login OK");
+        showScreen('solicitacoes');
+    } else {
+        alert("Erro no login");
+    }
+};
+
+</script>
+
+</body>
+</html>

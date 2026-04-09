@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Maker - Registro</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .register-container {
+        background-color: #1e1e1e;
+        padding: 2rem;
+        border-radius: 8px;
+        border: 1px solid #333;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+    h2 { color: #2563eb; margin-bottom: 1rem; }
+    input {
+        width: 100%;
+        padding: 0.6rem;
+        margin: 0.5rem 0;
+        border-radius: 5px;
+        border: 1px solid #555;
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+    }
+    input::placeholder { color: #aaa; }
+    button {
+        width: 100%;
+        padding: 0.8rem;
+        margin-top: 1rem;
+        border: none;
+        border-radius: 5px;
+        background-color: #2563eb;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    button:hover { background-color: #1d4ed8; }
+    .link { color: #aaa; margin-top: 1rem; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="register-container">
+    <h2>Registro Profissional</h2>
+    <form id="register-form">
+        <input type="text" placeholder="Nome" required>
+        <input type="email" placeholder="Email" required>
+        <input type="password" placeholder="Senha" required>
+        <button type="submit">Criar Conta</button>
+    </form>
+    <span class="link" onclick="window.location.href='login.html'">Já possui conta? Login</span>
+</div>
+
+<script>
+document.getElementById('register-form').addEventListener('submit', e=>{
+    e.preventDefault();
+    // Aqui você pode adicionar fetch para /register
+    alert('Conta criada com sucesso!');
+    window.location.href = 'login.html';
+});
+</script>
+</body>
+</html>
